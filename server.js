@@ -1,22 +1,44 @@
+require('dotenv').config()
+
+const express = require('express')
+const cors = require('cors')
+
+const authRoutes = require('./routes/auth')
+const studentRoutes = require('./routes/students')
+
+// ✅ Create app FIRST
+const app = express()
+const PORT = process.env.PORT || 5000
+
+// ✅ THEN use middleware
 app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests without origin (Postman, server-to-server)
-    if (!origin) return callback(null, true);
-
-    // Allow localhost for development
-    if (origin.startsWith('http://localhost')) {
-      return callback(null, true);
-    }
-
-    // Allow ALL Vercel deployments (production + preview)
-    if (origin.endsWith('.vercel.app')) {
-      return callback(null, true);
-    }
-
-    // Block all other origins, WITHOUT throwing
-    return callback(null, false);
-  },
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'https://orange-uni-project-v9yl.vercel.app'
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
-}));
+}))
+
+app.use(express.json())
+
+// ✅ Health check
+app.get('/', (req, res) => {
+  res.json({ message: 'Orange-Uni Student Portal API is running.' })
+})
+
+// ✅ Routes
+app.use('/auth', authRoutes)
+app.use('/students', studentRoutes)
+
+// ✅ Fallback
+app.use((req, res) => {
+  res.status(404).json({ error: 'Route not found.' })
+})
+
+// ✅ Start server
+app.listen(PORT, () => {
+  console.log(`Orange-Uni API running on port ${PORT}`)
+})
