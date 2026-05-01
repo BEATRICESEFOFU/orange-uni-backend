@@ -1,20 +1,20 @@
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow server-to-server & tools like Postman
+    // Allow requests without origin (Postman, server-to-server)
     if (!origin) return callback(null, true);
 
-    // Allow localhost
+    // Allow localhost for development
     if (origin.startsWith('http://localhost')) {
       return callback(null, true);
     }
 
-    // Allow ALL Vercel deployments
+    // Allow ALL Vercel deployments (production + preview)
     if (origin.endsWith('.vercel.app')) {
       return callback(null, true);
     }
 
-    // Block everything else
-    return callback(new Error('Not allowed by CORS'));
+    // Block all other origins, WITHOUT throwing
+    return callback(null, false);
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
